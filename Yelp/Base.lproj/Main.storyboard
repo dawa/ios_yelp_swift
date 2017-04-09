@@ -159,34 +159,13 @@
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="SwitchCell" rowHeight="131" id="05L-pp-N5v" customClass="SwitchCell" customModule="Yelp" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="nil" rowHeight="131" id="05L-pp-N5v">
                                         <rect key="frame" x="0.0" y="28" width="414" height="131"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="05L-pp-N5v" id="gPr-WS-sfh">
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="130.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Q8f-45-I7X">
-                                                    <rect key="frame" x="14.999999999999996" y="55.333333333333329" width="41.666666666666657" height="20.333333333333329"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <nil key="textColor"/>
-                                                    <nil key="highlightedColor"/>
-                                                </label>
-                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="UrJ-MM-FU5">
-                                                    <rect key="frame" x="350" y="50" width="51" height="31"/>
-                                                </switch>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="Q8f-45-I7X" firstAttribute="leading" secondItem="gPr-WS-sfh" secondAttribute="leading" constant="15" id="DHA-Nn-zX3"/>
-                                                <constraint firstItem="Q8f-45-I7X" firstAttribute="centerY" secondItem="gPr-WS-sfh" secondAttribute="centerY" id="dLr-wT-tb3"/>
-                                                <constraint firstItem="UrJ-MM-FU5" firstAttribute="centerY" secondItem="gPr-WS-sfh" secondAttribute="centerY" id="wLH-ka-qNC"/>
-                                                <constraint firstAttribute="trailing" secondItem="UrJ-MM-FU5" secondAttribute="trailing" constant="15" id="xsd-cA-rgK"/>
-                                            </constraints>
                                         </tableViewCellContentView>
-                                        <connections>
-                                            <outlet property="onSwitch" destination="UrJ-MM-FU5" id="CJJ-SV-GbW"/>
-                                            <outlet property="switchLabel" destination="Q8f-45-I7X" id="nh6-jR-Qnt"/>
-                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
@@ -217,7 +196,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4en-8f-ZRG" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4446.376811594203" y="355.43478260869568"/>
+            <point key="canvasLocation" x="4366" y="358"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="bRO-2x-Ugd">

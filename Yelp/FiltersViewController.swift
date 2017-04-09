@@ -7,18 +7,11 @@
 //
 
 import UIKit
+
 protocol FiltersViewControllerDelegate: class {
     func filtersViewController(filtersViewController: FiltersViewController,
                                               didUpdateFilters filters: YelpFilters)
 }
-
-//filter list -> category, sort (best match, distance, highest rated), deals (on/off), radius (meters)
-//struct YelpFilters {
-//    var categories = [String]()
-//    var sort: YelpSortMode?
-//    var deals = false
-//    var radius: Int?
-//}
 
 class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -113,7 +106,7 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
                     cell.accessoryView = UIImageView(image: UIImage(named: "unchecked"))
                 }
             } else {
-                cell.textLabel?.text = "See More"
+                cell.textLabel?.text = "See All"
                 cell.textLabel?.textAlignment = NSTextAlignment.center
                 cell.textLabel?.textColor = .darkGray
             }
@@ -130,7 +123,44 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
 
         return cell
     }
-    
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let filter = self.model!.filters[indexPath.section]
+        switch filter.type {
+        case .Single:
+            if filter.opened {
+                let previousIndex = filter.selectedIndex
+                if previousIndex != indexPath.row {
+                    filter.selectedIndex = indexPath.row
+                    let previousIndexPath = IndexPath(item: previousIndex, section: indexPath.section)
+                    self.tableView.reloadRows(at: [indexPath, previousIndexPath], with: .automatic)
+                }
+            }
+
+            let opened = filter.opened;
+            filter.opened = !opened;
+
+            if opened {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.tableView.reloadSections(NSMutableIndexSet(index: indexPath.section) as IndexSet, with: .automatic)
+                }
+            } else {
+                self.tableView.reloadSections(NSMutableIndexSet(index: indexPath.section) as IndexSet, with: .automatic)
+            }
+        case .Multiple:
+            if !filter.opened && indexPath.row == filter.numItemsVisible {
+                filter.opened = true
+                self.tableView.reloadSections(NSMutableIndexSet(index: indexPath.section) as IndexSet, with: .automatic)
+            } else {
+                let option = filter.options[indexPath.row]
+                option.selected = !option.selected
+                self.tableView.reloadRows(at: [indexPath], with: .automatic)
+            }
+        default:
+            break
+        }
+    }
+
     func switchValueChanged(switchCell: UISwitch, didChangeValue value: Bool) {
         let cell = switchCell.superview as! UITableViewCell
         if let indexPath = tableView.indexPath(for: cell) {
