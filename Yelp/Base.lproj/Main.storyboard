@@ -10,7 +10,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Yelp-->
+        <!--Businesses View Controller-->
         <scene sceneID="5L9-Uz-lNK">
             <objects>
                 <viewController id="2xI-yr-O5N" customClass="BusinessesViewController" customModule="Yelp" customModuleProvider="target" sceneMemberID="viewController">
@@ -128,7 +128,7 @@
                             <constraint firstAttribute="trailing" secondItem="YS3-d4-f0s" secondAttribute="trailing" id="wwt-ub-8hU"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Yelp" id="tr3-io-SLc">
+                    <navigationItem key="navigationItem" id="tr3-io-SLc">
                         <barButtonItem key="leftBarButtonItem" title="Filters" id="GQn-NC-uUe">
                             <connections>
                                 <segue destination="bCG-9S-hof" kind="presentation" id="A70-Hk-kp5"/>
@@ -221,9 +221,12 @@
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="bCG-9S-hof" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="gOg-x1-CkU">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" misplaced="YES" id="gOg-x1-CkU">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <textAttributes key="titleTextAttributes">
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>

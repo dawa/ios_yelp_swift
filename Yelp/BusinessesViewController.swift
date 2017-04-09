@@ -27,11 +27,17 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 120
         
+        // Customize Navigation Bar
+        if let navigationBar = navigationController?.navigationBar {
+            navigationBar.barTintColor = UIColor.red
+            navigationBar.tintColor = UIColor.white
+        }
+
         // Add a search bar
         let searchBar = UISearchBar()
         searchBar.sizeToFit()
         searchBar.delegate = self
-        searchBar.placeholder = "thai, sandwiches"
+        searchBar.placeholder = "Restautants"
         self.navigationItem.titleView = searchBar
         
         // Run Yelp search with default term = "Restaurants"
