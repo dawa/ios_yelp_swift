@@ -7,17 +7,31 @@
 //
 
 import UIKit
-@objc protocol FiltersViewControllerDelegate {
-    @objc optional func filtersViewController(filtersViewController: FiltersViewController,
-                                              didUpdateFilters filters: [String: AnyObject])
+protocol FiltersViewControllerDelegate {
+    func filtersViewController(filtersViewController: FiltersViewController,
+                                              didUpdateFilters filters: YelpFilters)
 }
+
+//filter list -> category, sort (best match, distance, highest rated), deals (on/off), radius (meters)
+struct YelpFilters {
+    var categories = [String]()
+    var sort: YelpSortMode?
+    var deals = false
+    var radius: Int?
+}
+
 class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, SwitchCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
-    weak var delegate: FiltersViewControllerDelegate?
+    var delegate: FiltersViewControllerDelegate?
     
     var categories: [[String:String]]!
     var switchStates = [Int:Bool]()
+    var deals = false
+    var sortGroupLastSelected: IndexPath?
+    var radiusLastSelected: IndexPath?
+
+    let distance = [10, 30, 50]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,8 +53,18 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
 
     @IBAction func onSearchButton(_ sender: Any) {
         dismiss(animated: true, completion: nil)
+
+        var sortMode = YelpSortMode.bestMatched
+        var distance: Int?
+
+        if self.sortGroupLastSelected != nil {
+            sortMode = YelpSortMode.allValues[self.sortGroupLastSelected!.row]
+        }
+
+        if self.radiusLastSelected != nil {
+            distance = self.distance[self.radiusLastSelected!.row]
+        }
         
-        var filters = [String: AnyObject]()
         var selectedCategories  = [String]()
         
         for (row, isSelected) in switchStates {
@@ -49,11 +73,8 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
             }
         }
         
-        if selectedCategories.count > 0 {
-            filters["categories"] = selectedCategories as AnyObject
-        }
-        
-        delegate?.filtersViewController?(filtersViewController: self, didUpdateFilters: filters)
+        let filters = YelpFilters(categories: selectedCategories, sort: sortMode, deals: self.deals, radius: distance)
+        delegate?.filtersViewController(filtersViewController: self, didUpdateFilters: filters)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
