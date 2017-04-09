@@ -19,7 +19,6 @@ let yelpTokenSecret = "mqtKIxMIR4iBtBPZCmCLEb-Dz3Y"
 
 enum YelpSortMode: Int {
     case bestMatched = 0, distance, highestRated
-    static let allValues = [bestMatched, distance, highestRated]
 }
 
 class YelpClient: BDBOAuth1RequestOperationManager {
@@ -45,14 +44,11 @@ class YelpClient: BDBOAuth1RequestOperationManager {
     }
     
     func searchWithTerm(_ term: String, completion: @escaping ([Business]?, Error?) -> Void) -> AFHTTPRequestOperation {
-        return searchWithTerm(term, sort: nil, categories: nil, deals: nil, completion: completion)
+        return searchWithTerm(term, parameters: nil, completion: completion)
     }
-    
+
     func searchWithTerm(_ term: String, sort: YelpSortMode?, categories: [String]?, deals: Bool?, completion: @escaping ([Business]?, Error?) -> Void) -> AFHTTPRequestOperation {
-        // For additional parameters, see http://www.yelp.com/developers/documentation/v2/search_api
-        
-        // Default the location to San Francisco
-        var parameters: [String : AnyObject] = ["term": term as AnyObject, "ll": "37.785771,-122.406165" as AnyObject]
+        var parameters: [String : AnyObject] = [String : AnyObject]()
         
         if sort != nil {
             parameters["sort"] = sort!.rawValue as AnyObject?
@@ -66,9 +62,28 @@ class YelpClient: BDBOAuth1RequestOperationManager {
             parameters["deals_filter"] = deals! as AnyObject?
         }
         
-        print(parameters)
+        return searchWithTerm(term, parameters: parameters, completion: completion)
+    }
+
+    func searchWithTerm(_ term: String, parameters: [String : AnyObject]? = nil, offset: Int = 0, limit: Int = 20, completion: @escaping ([Business]?, Error?) -> Void) -> AFHTTPRequestOperation {
+        // For additional parameters, see http://www.yelp.com/developers/documentation/v2/search_api
+
+        var params: [String : AnyObject] = [
+            "term": (term as AnyObject?)!,
+            "ll": "37.785771,-122.406165" as AnyObject, // Default the location to San Francisco
+            "offset": (offset as AnyObject?)!,
+            "limit": (limit as AnyObject?)!
+        ]
+
+        if parameters != nil {
+            for (key, value) in parameters! {
+                params[key] = value as AnyObject?
+            }
+        }
         
-        return self.get("search", parameters: parameters,
+        print(params)
+
+        return self.get("search", parameters: params,
                         success: { (operation: AFHTTPRequestOperation, response: Any) -> Void in
                             if let response = response as? [String: Any]{
                                 let dictionaries = response["businesses"] as? [NSDictionary]
@@ -76,9 +91,9 @@ class YelpClient: BDBOAuth1RequestOperationManager {
                                     completion(Business.businesses(array: dictionaries!), nil)
                                 }
                             }
-                        },
+        },
                         failure: { (operation: AFHTTPRequestOperation?, error: Error) -> Void in
                             completion(nil, error)
-                        })!
+        })!
     }
 }

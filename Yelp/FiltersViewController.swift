@@ -7,39 +7,37 @@
 //
 
 import UIKit
-protocol FiltersViewControllerDelegate {
+protocol FiltersViewControllerDelegate: class {
     func filtersViewController(filtersViewController: FiltersViewController,
                                               didUpdateFilters filters: YelpFilters)
 }
 
 //filter list -> category, sort (best match, distance, highest rated), deals (on/off), radius (meters)
-struct YelpFilters {
-    var categories = [String]()
-    var sort: YelpSortMode?
-    var deals = false
-    var radius: Int?
-}
+//struct YelpFilters {
+//    var categories = [String]()
+//    var sort: YelpSortMode?
+//    var deals = false
+//    var radius: Int?
+//}
 
-class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, SwitchCellDelegate {
+class FiltersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
     @IBOutlet weak var tableView: UITableView!
-    var delegate: FiltersViewControllerDelegate?
+    weak var delegate: FiltersViewControllerDelegate?
     
-    var categories: [[String:String]]!
-    var switchStates = [Int:Bool]()
-    var deals = false
-    var sortGroupLastSelected: IndexPath?
-    var radiusLastSelected: IndexPath?
-
-    let distance = [10, 30, 50]
+    var model: YelpFilters?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        categories = yelpCategories()
+        // Create a new instance of the model for this "session"
+        self.model = YelpFilters(instance: YelpFilters.instance)
         
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.rowHeight = UITableViewAutomaticDimension
+        tableView.estimatedRowHeight = 120
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -54,50 +52,91 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
     @IBAction func onSearchButton(_ sender: Any) {
         dismiss(animated: true, completion: nil)
 
-        var sortMode = YelpSortMode.bestMatched
-        var distance: Int?
+        YelpFilters.instance.copyStateFrom(instance: self.model!)
+        delegate?.filtersViewController(filtersViewController: self, didUpdateFilters: self.model!)
+    }
 
-        if self.sortGroupLastSelected != nil {
-            sortMode = YelpSortMode.allValues[self.sortGroupLastSelected!.row]
-        }
-
-        if self.radiusLastSelected != nil {
-            distance = self.distance[self.radiusLastSelected!.row]
-        }
-        
-        var selectedCategories  = [String]()
-        
-        for (row, isSelected) in switchStates {
-            if isSelected {
-                selectedCategories.append(categories[row]["code"]!)
-            }
-        }
-        
-        let filters = YelpFilters(categories: selectedCategories, sort: sortMode, deals: self.deals, radius: distance)
-        delegate?.filtersViewController(filtersViewController: self, didUpdateFilters: filters)
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return self.model!.filters.count
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        let filter = self.model!.filters[section]
+        if !filter.opened {
+            if filter.type == FilterType.Single {
+                return 1
+            } else if filter.numItemsVisible! > 0 && filter.numItemsVisible! < filter.options.count {
+                return filter.numItemsVisible! + 1
+            }
+        }
+        return filter.options.count
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let filter = self.model!.filters[section]
+        let label = filter.label
+        
+        // Add the number of selected options for multiple-select filters with hidden options
+        if filter.type == .Multiple && filter.numItemsVisible! > 0 && filter.numItemsVisible! < filter.options.count && !filter.opened {
+            let selectedOptions = filter.selectedOptions
+            return "\(label) (\(selectedOptions.count) selected)"
+        }
+        
+        return label
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SwitchCell", for: indexPath) as! SwitchCell
+        let cell = UITableViewCell(style: UITableViewCellStyle.default, reuseIdentifier: nil)
         
-        cell.switchLabel.text = categories[indexPath.row]["name"]
-        cell.delegate = self
-        
-        cell.onSwitch.isOn = switchStates[indexPath.row] ?? false
+        let filter = self.model!.filters[indexPath.section]
+        switch filter.type {
+        case .Single:
+            if filter.opened {
+                let option = filter.options[indexPath.row]
+                cell.textLabel?.text = option.label
+                if option.selected {
+                    cell.accessoryView = UIImageView(image: UIImage(named: "checked"))
+                } else {
+                    cell.accessoryView = UIImageView(image: UIImage(named: "unchecked"))
+                }
+            } else {
+                cell.textLabel?.text = filter.options[filter.selectedIndex].label
+                cell.accessoryView = UIImageView(image: UIImage(named: "dropdown"))
+            }
+        case .Multiple:
+            if filter.opened || indexPath.row < filter.numItemsVisible! {
+                let option = filter.options[indexPath.row]
+                cell.textLabel?.text = option.label
+                if option.selected {
+                    cell.accessoryView = UIImageView(image: UIImage(named: "checked"))
+                } else {
+                    cell.accessoryView = UIImageView(image: UIImage(named: "unchecked"))
+                }
+            } else {
+                cell.textLabel?.text = "See More"
+                cell.textLabel?.textAlignment = NSTextAlignment.center
+                cell.textLabel?.textColor = .darkGray
+            }
+        default:
+            let option = filter.options[indexPath.row]
+            cell.textLabel?.text = option.label
+            cell.selectionStyle = UITableViewCellSelectionStyle.none
+            let switchView = UISwitch()
+            switchView.isOn = option.selected
+            switchView.onTintColor = UIColor(red: 73.0/255.0, green: 134.0/255.0, blue: 231.0/255.0, alpha: 1.0)
+            switchView.addTarget(self, action: #selector(self.switchValueChanged), for: UIControlEvents.valueChanged)
+            cell.accessoryView = switchView
+        }
+
         return cell
     }
     
-    func switchCell(switchCell: SwitchCell, didChangeValue value: Bool) {
-        let indexPath = tableView.indexPath(for: switchCell)
-        switchStates[(indexPath?.row)!] = value
-    }
-
-    func yelpCategories() -> [[String:String]] {
-        return [["name" : "Afghan", "code" : "afghani"],
-                ["name" : "African", "code" : "african"]]
+    func switchValueChanged(switchCell: UISwitch, didChangeValue value: Bool) {
+        let cell = switchCell.superview as! UITableViewCell
+        if let indexPath = tableView.indexPath(for: cell) {
+            let filter = self.model!.filters[indexPath.section] as Filter
+            let option = filter.options[indexPath.row]
+            option.selected = switchCell.isOn
+        }
     }
 }

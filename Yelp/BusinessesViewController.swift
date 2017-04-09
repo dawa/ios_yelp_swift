@@ -13,7 +13,9 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
     
     var businesses: [Business]!
     var searchTerm = "Restaurants"
-    var filters: YelpFilters?
+    var yelpFilters: YelpFilters?
+    var offset: Int = 0
+    let limit: Int = 20
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -29,6 +31,7 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
         let searchBar = UISearchBar()
         searchBar.sizeToFit()
         searchBar.delegate = self
+        searchBar.placeholder = "thai, sandwiches"
         self.navigationItem.titleView = searchBar
         
         // Run Yelp search with default term = "Restaurants"
@@ -57,7 +60,6 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
     
      // MARK: - Navigation
      
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
      override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         let navigationController = segue.destination as! UINavigationController
         let filtersViewController = navigationController.topViewController as! FiltersViewController
@@ -65,10 +67,8 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
      }
 
     func doSearch() {
-        if self.filters != nil {
-            Business.searchWithTerm(term: self.searchTerm, sort: self.filters!.sort,
-                                    categories: self.filters!.categories,
-                                    deals: self.filters!.deals,
+        if self.yelpFilters != nil {
+            Business.searchWithTerm(term: self.searchTerm, parameters: self.getSearchParameters(),
                                     completion: { (businesses: [Business]?, error: Error?) -> Void in
                                         self.businesses = businesses
                                         self.tableView.reloadData()
@@ -80,7 +80,16 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
                 self.tableView.reloadData()
             })
         }
-        self.filters = nil
+        self.yelpFilters = nil
+    }
+
+    func getSearchParameters() -> [String : AnyObject] {
+        var parameters = [String : AnyObject]()
+
+        for (key, value) in YelpFilters.instance.parameters {
+            parameters[key] = value as AnyObject
+        }
+        return parameters
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -90,7 +99,7 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
 
     func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: YelpFilters) {
         self.searchTerm = "Restaurants"
-        self.filters = filters
+        self.yelpFilters = filters
         doSearch()
     }
 }
