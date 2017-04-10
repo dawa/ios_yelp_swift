@@ -10,7 +10,7 @@ import UIKit
 import C4
 
 class BusinessesViewController: UIViewController, UITableViewDelegate,
-UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
+UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate, UIScrollViewDelegate {
     
     var businesses: [Business]!
     var searchTerm = "Restaurants"
@@ -28,13 +28,6 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 120
         
-        // Infinite search
-//        self.tableView.addInfiniteScrollingWithActionHandler({
-//            self.performSearch(self.searchBar.text, offset: self.offset, limit: self.limit)
-//        })
-//        self.tableView.showsInfiniteScrolling = false
-        
-        
         // Customize Navigation Bar
         if let navigationBar = navigationController?.navigationBar {
             navigationBar.barTintColor = UIColor.red
@@ -48,6 +41,14 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
         searchBar.placeholder = "Restautants"
         self.navigationItem.titleView = searchBar
         
+        // Infinite Scrolling
+        let tableFooterView: UIView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 50))
+        let loadingView: UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        loadingView.startAnimating()
+        loadingView.center = tableFooterView.center
+        tableFooterView.addSubview(loadingView)
+        self.tableView.tableFooterView = tableFooterView
+
         // Run Yelp search with default term = "Restaurants"
         doSearch()
     }
@@ -58,10 +59,7 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if businesses != nil {
-            return businesses!.count
-        }
-        return 0
+        return self.businesses == nil ? 0 : self.businesses!.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -83,8 +81,10 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
     func doSearch() {
         if self.yelpFilters != nil {
             Business.searchWithTerm(term: self.searchTerm, parameters: self.getSearchParameters(),
+                                    offset: self.offset, limit: self.limit,
                                     completion: { (businesses: [Business]?, error: Error?) -> Void in
                                         self.businesses = businesses
+                                        self.offset = self.businesses.count
                                         self.tableView.reloadData()
             })
         }else {
@@ -108,12 +108,20 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchTerm = searchText
-        self.doSearch()
+        doSearch()
     }
 
     func filtersViewController(filtersViewController: FiltersViewController, didUpdateFilters filters: YelpFilters) {
-        self.searchTerm = "Restaurants"
+        if self.searchTerm == "" {
+            self.clearResults()
+        }
         self.yelpFilters = filters
         doSearch()
+    }
+
+    // Infinite search
+    final func clearResults() {
+        self.businesses = [Business]()
+        self.offset = 0
     }
 }
