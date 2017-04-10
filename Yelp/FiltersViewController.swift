@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import C4
 
 protocol FiltersViewControllerDelegate: class {
     func filtersViewController(filtersViewController: FiltersViewController,
@@ -19,6 +20,8 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
     weak var delegate: FiltersViewControllerDelegate?
     
     var model: YelpFilters?
+    
+    var yelpSwitch: YelpSwitch!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -119,7 +122,7 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
             let option = filter.options[indexPath.row]
             cell.textLabel?.text = option.label
             cell.selectionStyle = UITableViewCellSelectionStyle.none
-            let switchView = Switch(thumb: SwitchThumb(), background: SwitchBackground()) //Custom switch
+            let switchView = YelpSwitch(thumb: YelpThumb(), background: YelpBackground()) //Custom switch
             switchView.isOn = option.selected
             switchView.onTintColor = UIColor(red: 73.0/255.0, green: 134.0/255.0, blue: 231.0/255.0, alpha: 1.0)
             switchView.addTarget(self, action: #selector(self.switchValueChanged), for: UIControlEvents.valueChanged)
