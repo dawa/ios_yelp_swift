@@ -1,5 +1,6 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '9.0'
+inhibit_all_warnings!
 
 target 'Yelp' do
   # Comment this line if you're not using Swift and don't want to use dynamic frameworks
@@ -8,6 +9,7 @@ target 'Yelp' do
   # Pods for Yelp
   pod 'AFNetworking', '~> 2.5'
   pod 'BDBOAuth1Manager'
+  pod 'C4', '~> 2.1'
 
   target 'YelpTests' do
     inherit! :search_paths

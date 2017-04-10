@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import C4
 
 class BusinessesViewController: UIViewController, UITableViewDelegate,
 UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
@@ -26,6 +27,13 @@ UITableViewDataSource, FiltersViewControllerDelegate, UISearchBarDelegate {
         tableView.dataSource = self
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 120
+        
+        // Infinite search
+//        self.tableView.addInfiniteScrollingWithActionHandler({
+//            self.performSearch(self.searchBar.text, offset: self.offset, limit: self.limit)
+//        })
+//        self.tableView.showsInfiniteScrolling = false
+        
         
         // Customize Navigation Bar
         if let navigationBar = navigationController?.navigationBar {

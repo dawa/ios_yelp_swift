@@ -119,7 +119,7 @@ class FiltersViewController: UIViewController, UITableViewDataSource, UITableVie
             let option = filter.options[indexPath.row]
             cell.textLabel?.text = option.label
             cell.selectionStyle = UITableViewCellSelectionStyle.none
-            let switchView = UISwitch()
+            let switchView = Switch(thumb: SwitchThumb(), background: SwitchBackground()) //Custom switch
             switchView.isOn = option.selected
             switchView.onTintColor = UIColor(red: 73.0/255.0, green: 134.0/255.0, blue: 231.0/255.0, alpha: 1.0)
             switchView.addTarget(self, action: #selector(self.switchValueChanged), for: UIControlEvents.valueChanged)
